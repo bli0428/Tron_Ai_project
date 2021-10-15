@@ -15,9 +15,6 @@ class StudentBot:
         """
         Input: asp, a TronProblem
         Output: A direction in {'U','D','L','R'}
-
-        To get started, you can get the current
-        state by calling asp.get_start_state()
         """
         state = asp.get_start_state()
         locs = state.player_locs
@@ -25,9 +22,19 @@ class StudentBot:
         ptm = state.ptm
         loc = locs[ptm]
         possibilities = list(TronProblem.get_safe_actions(board, loc))
-        if possibilities:
-            return random.choice(possibilities)
-        return "U"
+        if not possibilities:
+            print("gg")
+            return "U"
+        
+        for move in possibilities:
+            arr = []
+            counter = 0
+            next_loc = loc
+            while move in TronProblem.get_safe_actions(board, next_loc):
+                next_loc = TronProblem.move(next_loc, move)
+                counter += 1
+            arr.append(counter)
+        return possibilities[np.argmax(arr)]
     
     def cleanup(self):
         """
@@ -50,6 +57,9 @@ class RandBot:
         """
         Input: asp, a TronProblem
         Output: A direction in {'U','D','L','R'}
+
+        To get started, you can get the current
+        state by calling asp.get_start_state()
         """
         state = asp.get_start_state()
         locs = state.player_locs
@@ -57,19 +67,9 @@ class RandBot:
         ptm = state.ptm
         loc = locs[ptm]
         possibilities = list(TronProblem.get_safe_actions(board, loc))
-        if not possibilities:
-            print("gg")
-            return "U"
-        
-        for move in possibilities:
-            arr = []
-            counter = 0
-            next_loc = loc
-            while move in TronProblem.get_safe_actions(board, next_loc):
-                next_loc = TronProblem.move(next_loc, move)
-                counter += 1
-            arr.append(counter)
-        return possibilities[np.argmax(arr)]
+        if possibilities:
+            return random.choice(possibilities)
+        return "U"
     
     def cleanup(self):
         pass
