@@ -69,7 +69,7 @@ class RandBot:
                 next_loc = TronProblem.move(next_loc, move)
                 counter += 1
             arr.append(counter)
-        return np.argmax(arr)
+        return possibilities[np.argmax(arr)]
     
     def cleanup(self):
         pass
