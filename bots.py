@@ -21,7 +21,10 @@ class StudentBot:
         Input: asp, a TronProblem
         Output: A direction in {'U','D','L','R'}
         """
-        return self.alpha_beta_cutoff(asp, 3, self.heuristic_func)
+        state = asp.get_start_state()
+        count = self.count_reachable_points(asp, state, state.player_locs[state.ptm])
+        cutoff_ply = 2 + int(300 / count)
+        return self.alpha_beta_cutoff(asp, cutoff_ply, self.heuristic_func)
     
     def cleanup(self):
         """
@@ -71,7 +74,7 @@ class StudentBot:
             if asp.is_terminal_state(state):
                 result = asp.evaluate_state(state)
                 # Since we can assume the games are alternating, I can just make the numbers negative
-                return maximizing_player * (result[1] - result[0])
+                return 10000 * maximizing_player * (result[1] - result[0])
             else:
                 v = -math.inf
                 for a in list(asp.get_safe_actions(state.board, state.player_locs[state.ptm])):
@@ -87,7 +90,7 @@ class StudentBot:
         def min_value(state: GameState, alpha: float, beta: float, c_ply: int) -> float:
             if asp.is_terminal_state(state):
                 result = asp.evaluate_state(state)
-                return maximizing_player * (result[1] - result[0])
+                return 10000 * maximizing_player * (result[1] - result[0])
             else:
                 v = math.inf
                 for a in list(asp.get_safe_actions(state.board, state.player_locs[state.ptm])):
@@ -117,25 +120,47 @@ class StudentBot:
                     curr_v = val
                     best_action = action
                 alpha = max(alpha, curr_v)
-        print(best_action)
         return best_action
 
     def heuristic_func(self, asp, state):
         ptm = state.ptm
         opp = (state.ptm+1)%2
         locs = state.player_locs
-        total = 0
+        ptm_total = 0
+        opp_total = 0
         ptm_dists = self.dijkstra(asp, state, locs[ptm])
         opp_dists = self.dijkstra(asp, state, locs[opp])
+
         for r in range(ptm_dists.shape[0]):
             for c in range(ptm_dists.shape[1]):
+                down_open = r + 1 < ptm_dists.shape[0] and ptm_dists[r+1,c] > 0
+                up_open = r - 1 >= 0 and ptm_dists[r-1,c] > 0
+                right_open = c + 1 < ptm_dists.shape[1] and ptm_dists[r, c+1] > 0
+                left_open = c - 1 >= 0 and ptm_dists[r, c-1] > 0
                 if ptm_dists[r,c] < opp_dists[r,c]:
-                    total +=1
+                    ptm_total += 1
+                    if up_open and down_open and left_open and right_open:
+                        ptm_total += 1
+                    elif (up_open and down_open and left_open) or (up_open and down_open and right_open) or (up_open and right_open and left_open) or (down_open and left_open and right_open):
+                        ptm_total += 0.5
                 elif ptm_dists[r,c] > opp_dists[r,c]:
-                    total -= 1
-                elif ptm_dists[r,c] == opp_dists[r,c]:
-                    total += 0.5
-        return total
+                    opp_total += 1
+                    if up_open and down_open and left_open and right_open:
+                        opp_total += 1
+                    elif (up_open and down_open and left_open) or (up_open and down_open and right_open) or (up_open and right_open and left_open) or (down_open and left_open and right_open):
+                        opp_total += 0.5
+
+
+                # if ptm_dists[r,c] == 0:
+                #     # indicates a wall/barrier
+                #     continue
+                # elif ptm_dists[r,c] < opp_dists[r,c]:
+                #     total +=1
+                # elif ptm_dists[r,c] > opp_dists[r,c]:
+                #     total -= 1
+                # elif ptm_dists[r,c] == opp_dists[r,c]:
+                #     total += 0.5
+        return ptm_total - opp_total
 
 
     def dijkstra(self, asp, state, pos):
@@ -160,6 +185,26 @@ class StudentBot:
                     result[next_loc] = curr_g
                     frontier.put(PrioritizedItem(priority, next_loc))
         return result
+
+    def count_reachable_points(self, asp, state, pos):
+        board = state.board
+        return (np.array(board) == ' ').sum()
+        # visited = set()
+        # visited.add(pos)
+        # count = 1
+        # frontier = Queue()
+        # frontier.put(pos)
+        # while not frontier.empty():
+        #     loc = frontier.get()
+        #     actions = asp.get_safe_actions(board, loc)
+        #     for direction in actions:
+        #         next_loc = asp.move(loc, direction)
+        #         if next_loc not in visited:
+        #             visited.add(loc)
+        #             count += 1
+        #             frontier.put(next_loc)
+        return count
+
         
 class RandBot:
     """Moves in a random (safe) direction"""
