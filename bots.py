@@ -87,7 +87,7 @@ class StudentBot:
         def min_value(state: GameState, alpha: float, beta: float, c_ply: int) -> float:
             if asp.is_terminal_state(state):
                 result = asp.evaluate_state(state)
-                return -1000*maximizing_player * (result[1] - result[0])
+                return 1000*maximizing_player * (result[1] - result[0])
             else:
                 v = math.inf
                 for a in list(asp.get_safe_actions(state.board, state.player_locs[state.ptm])):
