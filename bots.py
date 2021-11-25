@@ -157,12 +157,11 @@ class StudentBot:
                     if adj_is_battlefield == True:
                         ptm_counts.append(0)
                         break
-                    elif adj_num_spaces == 0 and visited[adj_next_ap[0]] == False:
-                        chain_adj = adj_next_ap[0]
+                    elif adj_num_spaces == 0 and len(list(adj_next_ap)) == 1 and visited[list(adj_next_ap)[0]] == False:
+                        chain_adj = list(adj_next_ap)[0]
                     else:
                         ptm_counts.append(adj_num_spaces)
                         break
-            print("POOO")
             ptm_spaces = num_spaces + max(ptm_counts)
 
             visited = np.zeros(np.shape(state.board))
@@ -175,8 +174,8 @@ class StudentBot:
                     if adj_is_battlefield == True:
                         opp_counts.append(0)
                         break
-                    elif adj_num_spaces == 0 and visited[adj_next_ap[0]] == False:
-                        chain_adj = adj_next_ap[0]
+                    elif adj_num_spaces == 0 and len(list(adj_next_ap)) == 1 and visited[list(adj_next_ap)[0]] == False:
+                        chain_adj = list(adj_next_ap)[0]
                     else:
                         opp_counts.append(adj_num_spaces)
                         break
@@ -194,7 +193,7 @@ class StudentBot:
         frontier = Queue()
         frontier.put(pos)
         visited[pos] = True
-        next_articulation_points = []
+        next_articulation_points = set()
         while not frontier.empty():
             loc = frontier.get()
             if loc in battlefield_points:
@@ -205,7 +204,7 @@ class StudentBot:
             for direction in actions:
                 next_loc = asp.move(loc, direction)
                 if next_loc in articulation_points:
-                    next_articulation_points.append(next_loc)
+                    next_articulation_points.add(next_loc)
                 if not visited[next_loc] and next_loc not in articulation_points:
                     frontier.put(next_loc)
                     visited[next_loc] = True
@@ -277,8 +276,6 @@ class Tarjan:
                     self.articulation_points.add(loc)
             elif next_loc != self.parents[loc]:
                 self.low[loc] = min(self.low[loc], self.discovery_time[next_loc])
-        
-
 
     def get_articulation_points(self):
         return self.articulation_points

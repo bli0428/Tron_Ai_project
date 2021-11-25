@@ -27,25 +27,25 @@ def run_game(asp, bots, visualizer=None, delay=0.2, max_wait=1.0, colored=True):
         exposed = copy.deepcopy(asp)
         signal.signal(signal.SIGALRM, support.timeout_handler)
         signal.setitimer(signal.ITIMER_REAL, max_wait)
-        try:
+        # try:
             # run AI
-            decision = bots[state.ptm].decide(exposed)
-        except support.TimeoutException:
-            if visualizer:
-                print(
-                    """Warning. Player %s took too long to decide on a move.
-They will go UP this round."""
-                    % (state.ptm + 1)
-                )
-            decision = "U"
-        except: # pylint: disable=bare-except
-            if visualizer:
-                print(
-                    """Warning. The move for player %s encountered an unexpected error.
-They will go UP this round."""
-                    % (state.ptm + 1)
-                )
-            decision = "U"
+        decision = bots[state.ptm].decide(exposed)
+#         except support.TimeoutException:
+#             if visualizer:
+#                 print(
+#                     """Warning. Player %s took too long to decide on a move.
+# They will go UP this round."""
+#                     % (state.ptm + 1)
+#                 )
+#             decision = "U"
+#         except: # pylint: disable=bare-except
+#             if visualizer:
+#                 print(
+#                     """Warning. The move for player %s encountered an unexpected error.
+# They will go UP this round."""
+#                     % (state.ptm + 1)
+#                 )
+#             decision = "U"
         
         signal.setitimer(signal.ITIMER_REAL, 0)
 
