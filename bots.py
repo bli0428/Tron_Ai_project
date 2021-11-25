@@ -162,7 +162,10 @@ class StudentBot:
                     else:
                         ptm_counts.append(adj_num_spaces)
                         break
-            ptm_spaces = num_spaces + max(ptm_counts)
+            if (len(ptm_counts) == 0):
+                ptm_spaces = num_spaces
+            else:
+                ptm_spaces = num_spaces + max(ptm_counts)
 
             visited = np.zeros(np.shape(state.board))
             num_spaces, is_battlefield, adj_ap = self.count_spaces(asp, state, locs[opp], visited, ap, battlefield)
@@ -179,7 +182,10 @@ class StudentBot:
                     else:
                         opp_counts.append(adj_num_spaces)
                         break
-            opp_spaces = num_spaces + max(opp_counts)
+            if len(opp_counts) == 0:
+                opp_spaces = num_spaces
+            else:
+                opp_spaces = num_spaces + max(opp_counts)
 
             return ptm_spaces - opp_spaces
             
