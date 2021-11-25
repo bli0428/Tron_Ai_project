@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import numpy as np
+from numpy.lib.polynomial import polysub
 from tronproblem import *
 from trontypes import CellType, PowerupType
 import random, math
@@ -123,21 +124,92 @@ class StudentBot:
         ptm = state.ptm
         opp = (state.ptm+1)%2
         locs = state.player_locs
-        total = 0
+        voronoi = 0
+
+        # ptm doesn't matter for tarjan, just need a starting point
+        tarjan = Tarjan(asp, state.board)
+        tarjan.find_articulation_points(locs[ptm])
+        ap = tarjan.get_articulation_points()
+
+        battlefield = set()
+
         ptm_dists = self.dijkstra(asp, state, locs[ptm])
         opp_dists = self.dijkstra(asp, state, locs[opp])
         for r in range(ptm_dists.shape[0]):
             for c in range(ptm_dists.shape[1]):
-                # if ptm_dists[r,c] == 0:
-                #     continue
+                if ptm_dists[r,c] != 0 and ptm_dists[r,c] == opp_dists[r,c]:
+                    battlefield.add((r,c))
                 if ptm_dists[r,c] < opp_dists[r,c]:
-                    total +=1
+                    voronoi +=1
                 elif ptm_dists[r,c] > opp_dists[r,c]:
-                    total -= 1
-                # elif ptm_dists[r,c] == opp_dists[r,c]:
-                #     total += 0.5
-        return total
+                    voronoi -= 1
 
+        visited = np.zeros(np.shape(state.board))
+        num_spaces, is_battlefield, adj_ap = self.count_spaces(asp, state, locs[ptm], visited, ap, battlefield)
+        if is_battlefield:
+            return voronoi
+        else:
+            ptm_counts = []
+            for adj in adj_ap:
+                chain_adj = adj
+                while True:
+                    adj_num_spaces, adj_is_battlefield, adj_next_ap = self.count_spaces(asp, state, chain_adj, visited, ap, battlefield)
+                    if adj_is_battlefield == True:
+                        ptm_counts.append(0)
+                        break
+                    elif adj_num_spaces == 0 and visited[adj_next_ap[0]] == False:
+                        chain_adj = adj_next_ap[0]
+                    else:
+                        ptm_counts.append(adj_num_spaces)
+                        break
+            print("POOO")
+            ptm_spaces = num_spaces + max(ptm_counts)
+
+            visited = np.zeros(np.shape(state.board))
+            num_spaces, is_battlefield, adj_ap = self.count_spaces(asp, state, locs[opp], visited, ap, battlefield)
+            opp_counts = []
+            for adj in adj_ap:
+                chain_adj = adj
+                while True:
+                    adj_num_spaces, adj_is_battlefield, adj_next_ap = self.count_spaces(asp, state, chain_adj, visited, ap, battlefield)
+                    if adj_is_battlefield == True:
+                        opp_counts.append(0)
+                        break
+                    elif adj_num_spaces == 0 and visited[adj_next_ap[0]] == False:
+                        chain_adj = adj_next_ap[0]
+                    else:
+                        opp_counts.append(adj_num_spaces)
+                        break
+            opp_spaces = num_spaces + max(opp_counts)
+
+            return ptm_spaces - opp_spaces
+            
+
+                    
+    
+    def count_spaces(self, asp, state, pos, visited, articulation_points, battlefield_points):
+        board = state.board
+        is_battlefield = False
+        count = 0
+        frontier = Queue()
+        frontier.put(pos)
+        visited[pos] = True
+        next_articulation_points = []
+        while not frontier.empty():
+            loc = frontier.get()
+            if loc in battlefield_points:
+                is_battlefield = True
+            if loc not in articulation_points:
+                count += 1
+            actions = asp.get_safe_actions(board, loc)
+            for direction in actions:
+                next_loc = asp.move(loc, direction)
+                if next_loc in articulation_points:
+                    next_articulation_points.append(next_loc)
+                if not visited[next_loc] and next_loc not in articulation_points:
+                    frontier.put(next_loc)
+                    visited[next_loc] = True
+        return count, is_battlefield, next_articulation_points
 
     def dijkstra(self, asp, state, pos):
         board = state.board
@@ -161,7 +233,56 @@ class StudentBot:
                     result[next_loc] = curr_g
                     frontier.put(PrioritizedItem(priority, next_loc))
         return result
+class Tarjan:
+
+    "Implements Tarjan's algorithm for finding articulation points"
+    def __init__(self, asp, board):
+        """
+        Input:
+            board- a list of lists of characters representing cells
+                ('#' for wall, ' ' for space, etc.)
+            player_locs- a list of tuples (representing the players' locations)
+            ptm- the player whose move it is. player_locs and ptm are
+                indexed the same way, so player_locs[ptm] would
+                give the location of the player whose move it is.
+            player_powerups- a map from player to a map of what powerups they have
+                {player : {PowerupType : powerup value}}
+        """
+        self.asp = asp
+        self.board = board
+        board_shape = np.shape(board)
+        self.articulation_points = set()
+        self.discovery_time = np.zeros(board_shape)
+        self.low = np.zeros(board_shape)
+        self.visited = np.zeros(board_shape)
+        self.parents = np.empty(board_shape, dtype=object)
+        self.time = 0
+    
+    def find_articulation_points(self, loc):
+        self.visited[loc] = True
+        self.time += 1
+        self.low[loc] = self.time
+        self.discovery_time[loc] = self.time
+        child = 0
+        for direction in self.asp.get_safe_actions(self.board, loc):
+            next_loc = self.asp.move(loc, direction)
+            if not self.visited[next_loc]:
+                child += 1
+                self.parents[next_loc] = loc
+                self.find_articulation_points(next_loc)
+                self.low[loc] = min(self.low[loc], self.low[next_loc])
+                if self.parents[loc] == None and child > 1:
+                    self.articulation_points.add(loc)
+                if self.parents[loc] != None and self.low[next_loc] >= self.discovery_time[loc]:
+                    self.articulation_points.add(loc)
+            elif next_loc != self.parents[loc]:
+                self.low[loc] = min(self.low[loc], self.discovery_time[next_loc])
         
+
+
+    def get_articulation_points(self):
+        return self.articulation_points
+
 class RandBot:
     """Moves in a random (safe) direction"""
 
