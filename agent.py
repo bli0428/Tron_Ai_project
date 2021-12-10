@@ -92,7 +92,7 @@ class Net(nn.Module):
 
     def train_model(self, examples):
         for epoch in range(self.num_epochs):
-            log.info(f'EPOCH ::: {epoch + 1}')
+            # log.info(f'EPOCH ::: {epoch + 1}')
             self.train()
 
             sum_pi = 0
@@ -119,7 +119,6 @@ class Net(nn.Module):
                 v_loss = self.loss_v(target_vs, out_v)
                 total_loss = pi_loss + v_loss
 
-                # TODO: verify that batch size == boards.size(0)
                 # record loss
                 sum_pi += pi_loss.item() * self.batch_size
                 sum_v += v_loss.item() * self.batch_size
@@ -127,7 +126,6 @@ class Net(nn.Module):
                 pi_losses = float(sum_pi) / count
                 v_losses = float(sum_v) / count
                 log.info(f'Total Loss: {total_loss:.2e}, Pi Loss: {pi_losses:.2e}, V Loss: {v_losses:.2e}')
-                num_batches_count.set_postfix(Loss_pi=pi_losses, Loss_v=v_losses)
 
                 # compute gradient and do SGD step
                 self.optimizer.zero_grad()
