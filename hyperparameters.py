@@ -1,5 +1,5 @@
 TRAINER_PARAMETERS = {
-    "num_iterations": 1000,
+    "num_iterations": 1000, 
     "num_episodes": 100,
     "temp_threshold": 15,
     "num_games": 20,

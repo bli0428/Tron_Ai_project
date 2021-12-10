@@ -70,7 +70,7 @@ class Trainer:
                     game = TronProblem(f'./maps/{map_path}.txt', 0)
                     mcts = MonteCarloSearchTree(game, self.net)  # reset search tree
                     episode = self.execute_episode(game, mcts)
-                    print(episode.shape)
+                    print(episode[0])
                     iteration_train_examples.append(episode)
                 self.train_history.append(iteration_train_examples)
 
