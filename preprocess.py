@@ -24,7 +24,7 @@ def get_converted_boards(board, pi, player, winner):
     boards = get_board_symmetries(canonical_board, pi)
     output = []
     for b in boards:
-        output.append((pad_board(b[0]),b[1],player==winner))
+        output.append((pad_board(b[0]),b[1],1 if player==winner else -1))
     return output
     
 def convert_board(board, player):
@@ -72,7 +72,7 @@ def get_board_symmetries(board, pi):
     # 3 -> [L,R,D,U]    # 3R-> [L,R,U,D]
     
     for i in range(1, 5):
-        for j in [True, False]:
+        for j in range(2):
             new_b = np.rot90(board, i)
             new_pi = pi[[3,2,0,1]]
             for _ in range(i-1):
