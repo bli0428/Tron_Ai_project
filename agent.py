@@ -162,9 +162,10 @@ class Net(nn.Module):
             'state_dict': self.state_dict(),
         }, filepath)
 
-    def load(self, path='checkpoint/checkpoint.pth.tar'):
-        if not os.path.exists(path):
-            raise ("No model in path {}".format(path))
-        map_location = None if self.use_cudacuda else 'cpu'
-        checkpoint = torch.load(path, map_location=map_location)
+    def load(self, folder='checkpoint', filename='checkpoint.pth.tar'):
+        filepath = os.path.join(folder, filename)
+        if not os.path.exists(filepath):
+            raise ("No model in path {}".format(filepath))
+        map_location = None if self.use_cuda else 'cpu'
+        checkpoint = torch.load(filepath, map_location=map_location)
         self.load_state_dict(checkpoint['state_dict'])

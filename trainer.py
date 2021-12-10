@@ -70,7 +70,6 @@ class Trainer:
                     game = TronProblem(f'./maps/{map_path}.txt', 0)
                     mcts = MonteCarloSearchTree(game, self.net)  # reset search tree
                     iteration_train_examples.append(self.executeEpisode(game, mcts))
-                    log.info(f"iteration_train_examples length: {len(iteration_train_examples)}")
                 self.train_history.append(iteration_train_examples)
 
             if len(self.train_history) > self.train_history_size:
@@ -162,8 +161,8 @@ class Trainer:
             Pickler(f).dump(self.train_history)
         f.closed
 
-    def load_train_examples(self):
-        model_file = os.path.join(self.args.load_folder_file[0], self.args.load_folder_file[1])
+    def load_train_examples(self, folder='checkpoint', filename='checkpoint.pth.tar'):
+        model_file = os.path.join(folder, filename)
         examples_file = model_file + ".examples"
         if not os.path.isfile(examples_file):
             log.warning(f'File "{examples_file}" with train examples not found! Exiting...')
@@ -173,6 +172,5 @@ class Trainer:
             with open(examples_file, "rb") as f:
                 self.train_history = Unpickler(f).load()
             log.info('Loading done!')
-
-            # examples based on the model were already collected (loaded)
+            
             self.skip_first_self_play = True
