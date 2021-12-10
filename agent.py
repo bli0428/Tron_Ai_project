@@ -21,6 +21,7 @@ class Net(nn.Module):
             log.info('GPU found! Using CUDA for network...')
             self.device = 'cuda'
         else:
+            log.info('GPU not found, using cpu instead...')
             self.device = 'cpu'
         self.params = MODEL_PARAMETERS
         self.num_epochs = MODEL_PARAMETERS["num_epochs"]

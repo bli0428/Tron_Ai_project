@@ -9,7 +9,8 @@ TRAINER_PARAMETERS = {
 
 MCTS_PARAMETERS = {
     "c_puct": 1,
-    "num_sim": 25
+    "num_sim": 25,
+    "epsilon": 1e-8
 }
 
 MODEL_PARAMETERS = {

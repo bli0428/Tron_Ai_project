@@ -8,8 +8,6 @@ from hyperparameters import MCTS_PARAMETERS
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-EPSILON = 1e-8
-
 class MonteCarloSearchTree():
     def __init__(self, asp, net):
 
@@ -18,6 +16,7 @@ class MonteCarloSearchTree():
         self.num_actions = 4
         self.c_puct = MCTS_PARAMETERS["c_puct"]
         self.num_sim = MCTS_PARAMETERS["num_sim"]
+        self.epsilon = MCTS_PARAMETERS["epsilon"]
         self.Qsa = {}  # stores Q values for s,a (as defined in the paper)
         self.Nsa = {}  # stores #times edge s,a was visited
         self.Ns = {}  # stores #times board s was visited
@@ -58,6 +57,8 @@ class MonteCarloSearchTree():
                 # if all valid moves were masked make all valid moves equally probable
                 # a suggested workaround, hitting this line suggests something is wrong with code
                 log.error("All valid moves were masked, doing a workaround.")
+                log.info("loc: %s", state.player_locs[state.ptm])
+                log.info("available moves: %s" % valid_moves)
                 self.Ps[state] += valid_vector
                 self.Ps[state] /= np.sum(self.Ps[state])
 
@@ -111,7 +112,7 @@ class MonteCarloSearchTree():
             return self.Qsa[state, action] + self.c_puct * self.Ps[state][action] * math.sqrt(self.Ns[state]) / (
                 1 + self.Nsa[state, action])
         else:
-            return self.c_puct * self.Ps[state][action] * math.sqrt(self.Ns[state] + EPSILON) 
+            return self.c_puct * self.Ps[state][action] * math.sqrt(self.Ns[state] + self.epsilon) 
 
 def normalize(arr):
     sum = np.sum(arr)
