@@ -23,7 +23,6 @@ def main():
         net.load(args.load_model)
     else:
         log.info('Failed to load a checkpoint! Starting from scratch...')
-    print("poo")
     log.info('Loading Trainer...')
     # TODO: Add all Trainer Parameters
     trainer = Trainer(maps, net)

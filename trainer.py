@@ -38,7 +38,7 @@ class Trainer:
 
         self.checkpoint_dir = './temp/'
                                  
-    def executeEpisode(self, asp, mcts):
+    def execute_episode(self, asp, mcts):
         examples = []
         curr_timestep = 0
 
@@ -69,7 +69,9 @@ class Trainer:
                     map_path = np.random.choice(self.maps)
                     game = TronProblem(f'./maps/{map_path}.txt', 0)
                     mcts = MonteCarloSearchTree(game, self.net)  # reset search tree
-                    iteration_train_examples.append(self.executeEpisode(game, mcts))
+                    episode = self.execute_episode(game, mcts)
+                    print(episode.shape())
+                    iteration_train_examples.append(episode)
                 self.train_history.append(iteration_train_examples)
 
             if len(self.train_history) > self.train_history_size:
