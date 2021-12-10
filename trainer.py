@@ -59,7 +59,7 @@ class Trainer:
         winner = outcome.index(1)
         output = np.array([get_converted_boards(e[0],e[2],e[1], winner) for e in examples]).flatten()
         ee = examples[0]
-        print(get_converted_boards(ee[0],ee[2],ee[1]), winner)
+        print(get_converted_boards(ee[0],ee[2],ee[1], winner))
         print("-------------")
         print(output)
         return output
