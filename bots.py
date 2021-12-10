@@ -32,7 +32,7 @@ class StudentBot:
         Output: A direction in {'U','D','L','R'}
         """
         state = asp.get_start_state()
-        decision = np.argmax(self.mcts.compute_policy(state, temp=0))
+        decision = np.argmax(self.mcts.compute_policy(state, 0))
         return decision
     
     def cleanup(self):
