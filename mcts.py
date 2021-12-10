@@ -46,11 +46,10 @@ class MonteCarloSearchTree():
         if state not in self.Ps:
             converted_board = convert_board(state.board, state.ptm)
             padded_board = pad_board(converted_board)
-            pi, v = self.net.predict(padded_board)
-            self.Ps[state] = pi
+
+            self.Ps[state], v = self.net.predict(padded_board)
             
-            # TODO: Replace with normalize function if no errors
-            self.Ps = normalize(self.Ps[state])
+            self.Ps[state] = normalize(self.Ps[state])
             self.Ns[state] = 0
             return -v
         
