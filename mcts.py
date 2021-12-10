@@ -1,6 +1,8 @@
 import math
 import numpy as np
 import logging
+
+from torch.functional import norm
 from agent import Net
 from preprocess import convert_board, pad_board
 from hyperparameters import MCTS_PARAMETERS
@@ -24,7 +26,6 @@ class MonteCarloSearchTree():
         self.Ps = {}  # stores initial policy (returned by neural net)
 
         self.Es = {}  # stores game.getGameEnded ended for board s
-        self.Vs = {}  # stores game.getValidMoves for board s
 
         self.action_map = ['U','D','L','R']
 
@@ -47,37 +48,20 @@ class MonteCarloSearchTree():
             padded_board = pad_board(converted_board)
             self.Ps[state], v = self.net.predict(padded_board)
             valid_moves = self.asp.get_available_actions(state)
-            valid_vector = np.array([1 if action in valid_moves else 0 for action in self.action_map])
-            self.Ps[state] *= valid_vector # Making sure to remove impossible moves
             
             # TODO: Replace with normalize function if no errors
-            state_sum = np.sum(self.Ps[state])
-            if state_sum > 0:
-                self.Ps[state] /= state_sum
-            else:
-                # if all valid moves were masked make all valid moves equally probable
-                # a suggested workaround, hitting this line suggests something is wrong with code
-                log.error("All valid moves were masked, doing a workaround.")
-                log.info("loc: %s", state.player_locs[state.ptm])
-                log.info("available moves: %s" % list(valid_moves))
-                TronProblem.visualize_state(state, True)
-                self.Ps[state] += valid_vector
-                self.Ps[state] /= np.sum(self.Ps[state])
-
-            self.Vs[state] = valid_vector
+            self.Ps = normalize(self.Ps[state])
             self.Ns[state] = 0
             return -v
         
-        valid_vector = self.Vs[state]
         curr = -float('inf')
         best_action = -1
 
         for action_ind in range(self.num_actions):
-            if valid_vector[action_ind]:
-                ucb = self.ucb(state, action_ind)
-                if ucb > curr:
-                    curr = ucb
-                    best_action = action_ind
+            ucb = self.ucb(state, action_ind)
+            if ucb > curr:
+                curr = ucb
+                best_action = action_ind
 
         next_state = self.asp.transition(state, self.action_map[best_action])
 
