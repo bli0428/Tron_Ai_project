@@ -25,6 +25,7 @@ def get_converted_boards(board, pi, player, winner):
     output = []
     for b in boards:
         output.append((pad_board(b[0]),b[1],player==winner))
+    return output
     
 def convert_board(board, player):
     # Determining what to transform player into requires a little extra logic, players will be represented
