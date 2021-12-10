@@ -61,7 +61,8 @@ class Trainer:
         for e in examples:
             output.extend(get_converted_boards(e[0],e[2],e[1], winner))
         print(len(output))
-        print(output[0].shape)
+        sample_ids = np.random.randint(len(examples), size=8)
+        boards, pis, vs = list(zip(*[examples[i] for i in sample_ids]))
         return output
     def learn(self):
         for i in range(self.num_iterations):
