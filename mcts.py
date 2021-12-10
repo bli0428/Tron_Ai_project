@@ -46,7 +46,7 @@ class MonteCarloSearchTree():
             converted_board = convert_board(state.board, state.ptm)
             padded_board = pad_board(converted_board)
             self.Ps[state], v = self.net.predict(padded_board)
-            valid_moves = self.asp.get_safe_actions(state.board, state.player_locs[state.ptm])
+            valid_moves = self.asp.get_available_actions(state)
             valid_vector = np.array([1 if action in valid_moves else 0 for action in self.action_map])
             self.Ps[state] *= valid_vector # Making sure to remove impossible moves
             
