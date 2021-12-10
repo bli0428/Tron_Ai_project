@@ -64,7 +64,8 @@ class Trainer:
             log.info(f'Starting Iteration {i+1} ...')
             if not self.skip_first_self_play or i > 0:
                 iteration_train_examples = []
-                for _ in range(self.num_episodes):
+                for ep in range(self.num_episodes):
+                    log.info(f'Running Episode {ep + 1}')
                     map_path = np.random.choice(self.maps)
                     game = TronProblem(f'./maps/{map_path}.txt', 0)
                     mcts = MonteCarloSearchTree(game, self.net)  # reset search tree

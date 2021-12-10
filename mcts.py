@@ -60,7 +60,7 @@ class MonteCarloSearchTree():
                 log.error("All valid moves were masked, doing a workaround.")
                 log.info("loc: %s", state.player_locs[state.ptm])
                 log.info("available moves: %s" % list(valid_moves))
-                TronProblem.visualize_state(state)
+                TronProblem.visualize_state(state, True)
                 self.Ps[state] += valid_vector
                 self.Ps[state] /= np.sum(self.Ps[state])
 
