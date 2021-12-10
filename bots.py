@@ -8,6 +8,9 @@ import random, math
 from queue import Queue, PriorityQueue
 from typing import Any
 from dataclasses import dataclass, field
+from agent import Net
+from mcts import MonteCarloSearchTree
+import time
 # Throughout this file, ASP means adversarial search problem.
 
 @dataclass(order=True)
@@ -20,17 +23,20 @@ class StudentBot:
 
         if mcts == None:
             # TODO: load model from file
-            pass
+            self.net = Net()
+            self.mcts = None
         else:
             self.mcts = mcts
-
-        pass
 
     def decide(self, asp):
         """
         Input: asp, a TronProblem
         Output: A direction in {'U','D','L','R'}
         """
+        start = time.time()
+        if self.mcts == None:
+            self.mcts = MonteCarloSearchTree(asp, self.net)
+        print(time.time() - start)
         state = asp.get_start_state()
         decision = np.argmax(self.mcts.compute_policy(state, 0))
         return decision
