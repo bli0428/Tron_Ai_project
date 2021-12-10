@@ -14,6 +14,7 @@ from pickle import Pickler, Unpickler
 from hyperparameters import TRAINER_PARAMETERS
 
 log = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 class Trainer:
     """

@@ -4,6 +4,7 @@ from agent import Net
 import argparse
 
 log = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 def main():
     parser = argparse.ArgumentParser(prog="main", usage="%(prog)s --load_model <path/to/model>")
@@ -21,8 +22,8 @@ def main():
         log.info('Loading checkpoint "%s/%s"...', args.load_model)
         net.load(args.load_model)
     else:
-        log.warning('Failed to load a checkpoint! Starting from scratch...')
-
+        log.info('Failed to load a checkpoint! Starting from scratch...')
+    print("poo")
     log.info('Loading Trainer...')
     # TODO: Add all Trainer Parameters
     trainer = Trainer(maps, net)

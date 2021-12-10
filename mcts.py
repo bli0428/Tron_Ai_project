@@ -6,6 +6,7 @@ from preprocess import convert_board, pad_board
 from hyperparameters import MCTS_PARAMETERS
 
 log = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 EPSILON = 1e-8
 

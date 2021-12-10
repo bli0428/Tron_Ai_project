@@ -20,7 +20,7 @@ def get_converted_boards(board, pi, player, winner):
     Returns a list of tuples of symmetrical boards with corresponding policies, and whether the player who
     corresponds to the boards is the winner
     """
-    canonical_board = convert_board(board, pi, player,)
+    canonical_board = convert_board(board, player)
     boards = get_board_symmetries(canonical_board, pi)
     output = []
     for b in boards:
