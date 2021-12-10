@@ -57,7 +57,9 @@ class Trainer:
             state = result_state
         outcome = asp.evaluate_state(state)
         winner = outcome.index(1)
-        output = np.array([get_converted_boards(e[0],e[2],e[1], winner) for e in examples]).flatten()
+        output = []
+        for e in examples:
+            output.extendget_converted_boards(e[0],e[2],e[1], winner)
         print(output[0])
         return output
     def learn(self):
