@@ -60,9 +60,6 @@ class Trainer:
         output = []
         for e in examples:
             output.extend(get_converted_boards(e[0],e[2],e[1], winner))
-        print(len(output))
-        sample_ids = np.random.randint(len(examples), size=8)
-        boards, pis, vs = list(zip(*[examples[i] for i in sample_ids]))
         return output
     def learn(self):
         for i in range(self.num_iterations):
@@ -75,7 +72,7 @@ class Trainer:
                     game = TronProblem(f'./maps/{map_path}.txt', 0)
                     mcts = MonteCarloSearchTree(game, self.net)  # reset search tree
                     episode = self.execute_episode(game, mcts)
-                    iteration_train_examples.append(episode)
+                    iteration_train_examples.extend(episode)
                 self.train_history.append(iteration_train_examples)
 
             if len(self.train_history) > self.train_history_size:
