@@ -135,10 +135,6 @@ class Net(nn.Module):
                 self.optimizer.step()
 
     def predict(self, board):
-        """
-        board: np array with board
-        """
-        # preparing input
         board = torch.FloatTensor(board.astype(np.float64))
         if self.use_cuda: 
             board = board.contiguous().cuda()

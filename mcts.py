@@ -46,8 +46,8 @@ class MonteCarloSearchTree():
         if state not in self.Ps:
             converted_board = convert_board(state.board, state.ptm)
             padded_board = pad_board(converted_board)
-            self.Ps[state], v = self.net.predict(padded_board)
-            valid_moves = self.asp.get_available_actions(state)
+            pi, v = self.net.predict(padded_board)
+            self.Ps[state] = pi
             
             # TODO: Replace with normalize function if no errors
             self.Ps = normalize(self.Ps[state])
