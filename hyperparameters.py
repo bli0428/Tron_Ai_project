@@ -3,14 +3,14 @@ TRAINER_PARAMETERS = {
     "num_episodes": 100, # Number of games played per iteration (More games = more examples to train on)
     "temp_threshold": 15, # Threshhold for temperature, increasing means spending longer exploring vs exploiting
     "num_games": 20, # How many games to play when comparing bots (Note: this means 20 games per map)
-    "update_threshold": 0.55, # The ratio of wins to games - if the bot scores above this for all maps, we update
-    "train_history_size": 20
+    "update_threshold": 0.55, # The ratio of wins to games - if the model scores above this for all maps, we update
+    "train_history_size": 20 # Maximum number of episode examples we keep at once in memory while training
 }
 
 MCTS_PARAMETERS = {
-    "c_puct": 1,
-    "num_sim": 25,
-    "epsilon": 1e-8
+    "c_puct": 1, # Another exploration / exploitation parameter,
+    "num_sim": 25, # How many we simulate when exploring the tree
+    "epsilon": 1e-8 # Small epsilon value to be used in the UCB function
 }
 
 MODEL_PARAMETERS = {

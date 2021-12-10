@@ -60,6 +60,8 @@ class Trainer:
         output = []
         for e in examples:
             output.extend(get_converted_boards(e[0],e[2],e[1], winner))
+        print(output.shape)
+        print(output[0].shape)
         return output
     def learn(self):
         for i in range(self.num_iterations):
