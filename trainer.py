@@ -107,7 +107,7 @@ class Trainer:
         for map_path in self.maps:
             p_bot_wins = 0
             n_bot_wins = 0
-            for _ in self.num_games:
+            for _ in range(self.num_games):
                 asp = TronProblem(f'./maps/{map_path}.txt', 0)
                 p_mcts = MonteCarloSearchTree(asp, self.prev_net)
                 n_mcts = MonteCarloSearchTree(asp, self.net)
