@@ -4,6 +4,7 @@ import logging
 from agent import Net
 from preprocess import convert_board, pad_board
 from hyperparameters import MCTS_PARAMETERS
+from tronproblem import TronProblem
 
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -58,7 +59,8 @@ class MonteCarloSearchTree():
                 # a suggested workaround, hitting this line suggests something is wrong with code
                 log.error("All valid moves were masked, doing a workaround.")
                 log.info("loc: %s", state.player_locs[state.ptm])
-                log.info("available moves: %s" % valid_moves)
+                log.info("available moves: %s" % list(valid_moves))
+                TronProblem.visualize_state(state)
                 self.Ps[state] += valid_vector
                 self.Ps[state] /= np.sum(self.Ps[state])
 
