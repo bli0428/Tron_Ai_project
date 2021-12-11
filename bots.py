@@ -39,6 +39,7 @@ class StudentBot:
         print(time.time() - start)
         state = asp.get_start_state()
         decision = np.argmax(self.mcts.compute_policy(state, 0))
+        print("hello moto")
         return decision
     
     def cleanup(self):
