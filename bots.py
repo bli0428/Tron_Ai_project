@@ -37,9 +37,10 @@ class StudentBot:
         if self.mcts == None:
             self.mcts = MonteCarloSearchTree(asp, self.net)
         print(time.time() - start)
+        start = time.time()
         state = asp.get_start_state()
         decision = np.argmax(self.mcts.compute_policy(state, 0))
-        print("hello moto")
+        print("Decision time: ", time.time() - start)
         return decision
     
     def cleanup(self):
