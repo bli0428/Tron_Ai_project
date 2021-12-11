@@ -9,7 +9,7 @@ TRAINER_PARAMETERS = {
 
 MCTS_PARAMETERS = {
     "c_puct": 1, # Another exploration / exploitation parameter,
-    "num_sim": 25, # How many we simulate when exploring the tree
+    "num_sim": 16, # How many we simulate when exploring the tree
     "epsilon": 1e-8 # Small epsilon value to be used in the UCB function
 }
 
