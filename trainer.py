@@ -42,6 +42,7 @@ class Trainer:
         examples = []
         curr_timestep = 0
 
+        # Play a round of Tron and gather examples to examine
         state = asp.get_start_state()
         while not (asp.is_terminal_state(state)):
             curr_timestep += 1
@@ -61,11 +62,15 @@ class Trainer:
         for e in examples:
             output.extend(get_converted_boards(e[0],e[2],e[1], winner))
         return output
+
+
     def learn(self):
         for i in range(self.num_iterations):
             log.info(f'Starting Iteration {i+1} ...')
             if not self.skip_first_self_play or i > 0:
                 iteration_train_examples = []
+
+                # Gets one long list of examples (and their symmetries) where one episode is one game as one item in iteration_train_examples
                 for ep in range(self.num_episodes):
                     # log.info(f'Running Episode {ep + 1}')
                     map_path = np.random.choice(self.maps)
@@ -82,6 +87,7 @@ class Trainer:
             
             self.save_train_examples(i)
 
+            # Puts all data into one list to train on (previous formatting is to allow removal of old entries)
             train_examples = []
             for e in self.train_history:
                 train_examples.extend(e)
@@ -93,10 +99,11 @@ class Trainer:
             self.net.train_model(train_examples)
 
             log.info('Playing previous version...')
-            n_wins, win_ratios = self.run_games()
-
+            total_ratio, win_ratios = self.run_games()
+            
+            # If newer model does better than older model by (win ratio), take it as the new comparer
             log.info('Win ratios: %s' % win_ratios)
-            if n_wins < len(self.maps):
+            if total_ratio < self.update_threshold:
                 log.info('Rejecting new model')
                 self.net.load(folder=self.checkpoint_dir, filename='temp.pth.tar')
             else:
@@ -105,8 +112,8 @@ class Trainer:
                 self.net.save(folder=self.checkpoint_dir, filename='best.pth.tar')
 
     def run_games(self):
-        n_map_wins = 0
         map_win_ratios = {}
+        final_ratio = 0
         for map_path in self.maps:
             p_bot_wins = 0
             n_bot_wins = 0
@@ -120,19 +127,16 @@ class Trainer:
                 p_bot_wins += g[0]
                 n_bot_wins += g[1]
             win_ratio = float(n_bot_wins) / (p_bot_wins + n_bot_wins)
-            if win_ratio >= self.update_threshold:
-                n_map_wins += 1
             map_win_ratios[map_path] = win_ratio
-        return n_map_wins, map_win_ratios
+            final_ratio += win_ratio
+        final_ratio /= len(self.maps)
+        return final_ratio, map_win_ratios
 
     def run_game(self, asp, bots):
         """
         Inputs:
             - asp: an adversarial search problem
-            - bots: a list in which the i'th element is the bot for player i
-            - visualizer (optional): a void function that takes in a game state
-            and does something to visualize it. If no visualizer argument is
-            passed, run_game will not visualize games.
+            - bots: a list in which the i'th element is the bot for player
 
         A copy of the run_game function from gamerunner, with the timer functionality removed for simplicity's sake
         """

@@ -100,9 +100,10 @@ class Net(nn.Module):
             count = 0
 
             num_batches = int(len(examples) / self.batch_size)
+            num_batches_10 = int(num_batches / (num_batches / 10))
             num_batches_count = range(num_batches)
             
-            for _ in num_batches_count:
+            for batch in num_batches_count:
                 sample_ids = np.random.randint(len(examples), size=self.batch_size)
                 boards, pis, vs = list(zip(*[examples[i] for i in sample_ids]))
                 boards = torch.FloatTensor(np.array(boards).astype(np.float64))
@@ -125,7 +126,10 @@ class Net(nn.Module):
                 count += self.batch_size
                 pi_losses = float(sum_pi) / count
                 v_losses = float(sum_v) / count
-                log.info(f'Total Loss: {total_loss:.2e}, Pi Loss: {pi_losses:.2e}, V Loss: {v_losses:.2e}')
+
+                if batch % num_batches_10 == 0:
+                    # Since my output file was getting too big, I'm only allowing 10 logs of loss per iteration
+                    log.info(f'Total Loss: {total_loss:.2e}, Pi Loss: {pi_losses:.2e}, V Loss: {v_losses:.2e}')
 
                 # compute gradient and do SGD step
                 self.optimizer.zero_grad()
