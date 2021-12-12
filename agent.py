@@ -100,7 +100,6 @@ class Net(nn.Module):
             count = 0
 
             num_batches = int(len(examples) / self.batch_size)
-            num_batches_10 = int(num_batches / (num_batches / 10))
             num_batches_count = range(num_batches)
 
             for batch in num_batches_count:
@@ -124,17 +123,17 @@ class Net(nn.Module):
                 sum_pi += pi_loss.item() * self.batch_size
                 sum_v += v_loss.item() * self.batch_size
                 count += self.batch_size
-                pi_losses = float(sum_pi) / count
-                v_losses = float(sum_v) / count
-
-                if batch % num_batches_10 == 0:
-                    # Since my output file was getting too big, I'm only allowing 10 logs of loss per iteration
-                    log.info(f'Total Loss: {total_loss:.2e}, Pi Loss: {pi_losses:.2e}, V Loss: {v_losses:.2e}')
 
                 # compute gradient and do SGD step
                 self.optimizer.zero_grad()
                 total_loss.backward()
                 self.optimizer.step()
+                
+            # Since my output file was getting too big, I'm only allowing 1 logs of loss per EPOCH
+            pi_losses = float(sum_pi) / count
+            v_losses = float(sum_v) / count
+
+            log.info(f'Total Loss: {total_loss:.2e}, Pi Loss: {pi_losses:.2e}, V Loss: {v_losses:.2e}')
 
     def predict(self, board):
         board = torch.FloatTensor(board.astype(np.float64))
