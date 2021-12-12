@@ -20,7 +20,6 @@ class PrioritizedItem:
 class StudentBot:
     """ Write your student bot here"""
     def __init__(self, mcts=None):
-        print("initializing bot...")
         if mcts == None:
             # TODO: load model from file
             self.net = Net()

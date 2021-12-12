@@ -7,7 +7,7 @@
 #SBATCH -n 1
 
 #SBATCH --mem=24G
-#SBATCH -t 16:00:00
+#SBATCH -t 32:00:00
 #SBATCH -o sum.out
 
 module load python/3.7.4
@@ -16,4 +16,4 @@ module load cuda/11.1.1
 module load cudnn/8.2.0
 module load gcc/10.2
 
-python main.py
+python main.py -load_model best.pth.tar
