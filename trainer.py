@@ -168,7 +168,7 @@ class Trainer:
             Pickler(f).dump(self.train_history)
         f.closed
 
-    def load_train_examples(self, folder='checkpoint', filename='checkpoint.pth.tar'):
+    def load_train_examples(self, folder='./temp', filename='checkpoint_23.pth.tar'):
         model_file = os.path.join(folder, filename)
         examples_file = model_file + ".examples"
         if not os.path.isfile(examples_file):
