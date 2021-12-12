@@ -20,11 +20,11 @@ class PrioritizedItem:
 class StudentBot:
     """ Write your student bot here"""
     def __init__(self, mcts=None):
-
+        print("initializing bot...")
         if mcts == None:
             # TODO: load model from file
             self.net = Net()
-            self.net.load(folder='./temp',filename='best.pth.tar')
+            # self.net.load(folder='./temp',filename='best.pth.tar')
             self.mcts = None
         else:
             self.mcts = mcts
@@ -34,16 +34,16 @@ class StudentBot:
         Input: asp, a TronProblem
         Output: A direction in {'U','D','L','R'}
         """
-        start = time.time()
+        # start = time.time()
         if self.mcts == None:
             self.mcts = MonteCarloSearchTree(asp, self.net)
-        print(time.time() - start)
-        start = time.time()
+        # print(time.time() - start)
+        # start = time.time()
         state = asp.get_start_state()
-        decision = np.argmax(self.mcts.compute_policy(state, 0))
-        print("Decision time: ", time.time() - start)
+        decision = self.mcts.action_map[np.argmax(self.mcts.compute_policy(state, 0))]
+        # print("Decision time: ", time.time() - start)
         return decision
-    
+
     def cleanup(self):
         """
         Input: None
@@ -78,7 +78,7 @@ class RandBot:
         if possibilities:
             return random.choice(possibilities)
         return "U"
-    
+
     def cleanup(self):
         pass
 
