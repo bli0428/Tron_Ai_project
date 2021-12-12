@@ -33,7 +33,7 @@ class Net(nn.Module):
         self.state_size_col = state_size_col
         self.state_size = state_size_row*state_size_col
         self.action_size = action_size
-        
+
         self.conv1 = nn.Conv2d(1, self.network_size, 3, stride=1, padding=1)
         self.conv2 = nn.Conv2d(self.network_size, self.network_size, 3, stride=1, padding=1)
         self.conv3 = nn.Conv2d(self.network_size, self.network_size, 3, stride=1)
@@ -102,7 +102,7 @@ class Net(nn.Module):
             num_batches = int(len(examples) / self.batch_size)
             num_batches_10 = int(num_batches / (num_batches / 10))
             num_batches_count = range(num_batches)
-            
+
             for batch in num_batches_count:
                 sample_ids = np.random.randint(len(examples), size=self.batch_size)
                 boards, pis, vs = list(zip(*[examples[i] for i in sample_ids]))
@@ -138,7 +138,7 @@ class Net(nn.Module):
 
     def predict(self, board):
         board = torch.FloatTensor(board.astype(np.float64))
-        if self.use_cuda: 
+        if self.use_cuda:
             board = board.contiguous().cuda()
         board = board.view(1, self.state_size_row, self.state_size_col)
         self.eval()
