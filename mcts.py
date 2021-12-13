@@ -76,19 +76,18 @@ class MonteCarloSearchTree():
         return -v
     
     def compute_policy(self, state, temperature):
-        for i in range(self.num_sim):
-            self.search(state)
-        
-        action_counts = [self.Nsa[(state, action)] if (state, action) in self.Nsa else 0 for action in range(self.num_actions)]
+        # Computes the policy purely with the neural net, with no MCTS
+        converted_board = convert_board(state.board, state.ptm)
+        padded_board = pad_board(converted_board)
+        pred_policy, v = self.net.predict(padded_board)
 
         if temperature == 0:
-            best_action_index = np.random.choice(np.array(np.argwhere(action_counts == np.max(action_counts))).flatten())
-            policy = np.zeros(len(action_counts))
+            best_action_index = np.random.choice(np.array(np.argwhere(pred_policy == np.max(pred_policy))).flatten())
+            policy = np.zeros(len(pred_policy))
             policy[best_action_index] = 1
             return policy
 
-        policy = np.array([count ** 1/float(temperature) for count in action_counts])
-        return normalize(policy)
+        return normalize(pred_policy)
 
 
     def ucb(self, state, action):
