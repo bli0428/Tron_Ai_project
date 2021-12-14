@@ -19,7 +19,7 @@ def main():
     net = Net()
 
     if args.load_model:
-        log.info('Loading checkpoint "%s/%s"...', args.load_model)
+        log.info('Loading model "./temp/%s"...', args.load_model)
         net.load('./temp', args.load_model)
     else:
         log.info('Failed to load a checkpoint! Starting from scratch...')

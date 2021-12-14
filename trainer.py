@@ -50,8 +50,14 @@ class Trainer:
         else:
             game = TronProblem(f'./maps/{map_path}.txt', np.random.choice(2))
             mcts = MonteCarloSearchTree(game, self.net)
-            bots = [lambda:bots.Wallbot(), lambda:ta_bots.TABot1(), lambda:ta_bots.TABot2()]
-            return self.bot_play_episode(game, mcts, bots[opp]())
+            bot = None
+            if opp == 0:
+                bot = bots.Wallbot()
+            elif opp == 1:
+                bot = ta_bots.TABot1()
+            elif opp == 2:
+                bot = ta_bots.TABot2()
+            return self.bot_play_episode(game, mcts, bot)
             
     def bot_play_episode(self, asp, mcts, bot):
         examples = []
