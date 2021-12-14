@@ -12,6 +12,8 @@ import os
 import sys
 from pickle import Pickler, Unpickler
 from hyperparameters import TRAINER_PARAMETERS
+import bots
+import ta_bots
 
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -37,8 +39,50 @@ class Trainer:
         self.skip_first_self_play = False
 
         self.checkpoint_dir = './temp/'
-                                 
-    def execute_episode(self, asp, mcts):
+
+    def execute_episode(self):
+        map_path = np.random.choice(self.maps)
+        opp = np.random.choice(4, p=[0.1, 0.2, 0.3, 0.4])
+        if opp == 3:
+            game = TronProblem(f'./maps/{map_path}.txt', 0)
+            mcts = MonteCarloSearchTree(game, self.net)
+            return self.self_play_episode(game, mcts)  
+        else:
+            game = TronProblem(f'./maps/{map_path}.txt', np.random.choice(2))
+            mcts = MonteCarloSearchTree(game, self.net)
+            bots = [lambda:bots.Wallbot(), lambda:ta_bots.TABot1(), lambda:ta_bots.TABot2()]
+            return self.bot_play_episode(game, mcts, bots[opp]())
+            
+    def bot_play_episode(self, asp, mcts, bot):
+        examples = []
+        curr_timestep = 0
+
+        state = asp.get_start_state()
+        while not (asp.is_terminal_state(state)):
+            decision = None
+            if state.ptm:
+                curr_timestep += 1
+                temp = int(curr_timestep < self.temperature_threshold)
+
+                pi = mcts.compute_policy(state, temp) 
+                examples.append([state.board, state.ptm, pi])
+                
+                choice = np.random.choice(len(pi), p=pi)
+                decision = mcts.action_map[choice]
+            else:
+                decision = bot.decide(asp)
+
+            result_state = asp.transition(state, decision)
+            asp.set_start_state(result_state)
+            state = result_state
+        outcome = asp.evaluate_state(state)
+        winner = outcome.index(1)
+        output = []
+        for e in examples:
+            output.extend(get_converted_boards(e[0],e[2],e[1], winner))
+        return output
+
+    def self_play_episode(self, asp, mcts):
         examples = []
         curr_timestep = 0
 
@@ -73,10 +117,7 @@ class Trainer:
                 # Gets one long list of examples (and their symmetries) where one episode is one game as one item in iteration_train_examples
                 for ep in range(self.num_episodes):
                     # log.info(f'Running Episode {ep + 1}')
-                    map_path = np.random.choice(self.maps)
-                    game = TronProblem(f'./maps/{map_path}.txt', 0)
-                    mcts = MonteCarloSearchTree(game, self.net)  # reset search tree
-                    episode = self.execute_episode(game, mcts)
+                    episode = self.execute_episode()
                     iteration_train_examples.extend(episode)
                 self.train_history.append(iteration_train_examples)
 
@@ -168,7 +209,7 @@ class Trainer:
             Pickler(f).dump(self.train_history)
         f.closed
 
-    def load_train_examples(self, folder='./temp', filename='checkpoint_23.pth.tar'):
+    def load_train_examples(self, folder='./temp', filename='current.pth.tar'):
         model_file = os.path.join(folder, filename)
         examples_file = model_file + ".examples"
         if not os.path.isfile(examples_file):
