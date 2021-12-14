@@ -23,7 +23,7 @@ class StudentBot:
         if mcts == None:
             # TODO: load model from file
             self.net = Net()
-            # self.net.load(folder='./temp',filename='best.pth.tar')
+            self.net.load(folder='./temp',filename='best.pth.tar')
             self.mcts = None
         else:
             self.mcts = mcts

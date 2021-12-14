@@ -17,12 +17,12 @@ class Net(nn.Module):
         """
         super(Net, self).__init__()
 
-        if torch.cuda.is_available():
-            log.info('GPU found! Using CUDA for network...')
-            self.device = 'cuda'
-        else:
-            log.info('GPU not found, using cpu instead...')
-            self.device = 'cpu'
+        # if torch.cuda.is_available():
+        #     log.info('GPU found! Using CUDA for network...')
+        #     self.device = 'cuda'
+        # else:
+        # log.info('GPU not found, using cpu instead...')
+        self.device = 'cpu'
         self.params = MODEL_PARAMETERS
         self.num_epochs = MODEL_PARAMETERS["num_epochs"]
         self.batch_size = MODEL_PARAMETERS["batch_size"]
@@ -128,7 +128,7 @@ class Net(nn.Module):
                 self.optimizer.zero_grad()
                 total_loss.backward()
                 self.optimizer.step()
-                
+
             # Since my output file was getting too big, I'm only allowing 1 logs of loss per EPOCH
             pi_losses = float(sum_pi) / count
             v_losses = float(sum_v) / count
