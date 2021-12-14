@@ -17,12 +17,12 @@ class Net(nn.Module):
         """
         super(Net, self).__init__()
 
-        # if torch.cuda.is_available():
-        #     log.info('GPU found! Using CUDA for network...')
-        #     self.device = 'cuda'
-        # else:
-        # log.info('GPU not found, using cpu instead...')
-        self.device = 'cpu'
+        if torch.cuda.is_available():
+            log.info('GPU found! Using CUDA for network...')
+            self.device = 'cuda'
+        else:
+            log.info('GPU not found, using cpu instead...')
+            self.device = 'cpu'
         self.params = MODEL_PARAMETERS
         self.num_epochs = MODEL_PARAMETERS["num_epochs"]
         self.batch_size = MODEL_PARAMETERS["batch_size"]
