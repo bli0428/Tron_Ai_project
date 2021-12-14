@@ -41,18 +41,18 @@ class MonteCarloSearchTree():
                 self.Es[state] = 0
         if self.Es[state] != 0:
             return -self.Es[state]
-                
-        
+
+
         if state not in self.Ps:
             converted_board = convert_board(state.board, state.ptm)
             padded_board = pad_board(converted_board)
 
             self.Ps[state], v = self.net.predict(padded_board)
-            
+
             self.Ps[state] = normalize(self.Ps[state])
             self.Ns[state] = 0
             return -v
-        
+
         curr = -float('inf')
         best_action = -1
 
@@ -74,11 +74,11 @@ class MonteCarloSearchTree():
 
         self.Ns[state] += 1
         return -v
-    
+
     def compute_policy(self, state, temperature):
         for i in range(self.num_sim):
             self.search(state)
-        
+
         action_counts = [self.Nsa[(state, action)] if (state, action) in self.Nsa else 0 for action in range(self.num_actions)]
 
         if temperature == 0:
@@ -97,7 +97,7 @@ class MonteCarloSearchTree():
             return self.Qsa[state, action] + self.c_puct * self.Ps[state][action] * math.sqrt(self.Ns[state]) / (
                 1 + self.Nsa[state, action])
         else:
-            return self.c_puct * self.Ps[state][action] * math.sqrt(self.Ns[state] + self.epsilon) 
+            return self.c_puct * self.Ps[state][action] * math.sqrt(self.Ns[state] + self.epsilon)
 
 def normalize(arr):
     sum = np.sum(arr)
