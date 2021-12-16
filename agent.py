@@ -5,6 +5,7 @@ import torch.nn.functional as F
 import logging
 import numpy as np
 import os
+import io
 from hyperparameters import MODEL_PARAMETERS
 
 log = logging.getLogger(__name__)
@@ -169,4 +170,17 @@ class Net(nn.Module):
             raise ("No model in path {}".format(filepath))
         map_location = None if self.use_cuda else 'cpu'
         checkpoint = torch.load(filepath, map_location=map_location)
+        self.load_state_dict(checkpoint['state_dict'])
+
+    def load_split(self, files, folder='./temp'):
+        filepaths = [os.path.join(folder, filename) for filename in files]
+        map_location = None if self.use_cuda else 'cpu'
+
+        buffer = io.BytesIO()
+        for file in filepaths:
+            with open(file, 'rb') as f:
+                buffer.write(f.read())
+            f.close()
+        buffer.seek(0)
+        checkpoint = torch.load(buffer, map_location)
         self.load_state_dict(checkpoint['state_dict'])
