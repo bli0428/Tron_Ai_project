@@ -8,6 +8,7 @@ from preprocess import convert_board, pad_board
 from hyperparameters import MCTS_PARAMETERS
 from tronproblem import TronProblem
 import time
+import support
 
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -77,18 +78,20 @@ class MonteCarloSearchTree():
         return -v
 
     def compute_policy(self, state, temperature):
-        for i in range(self.num_sim):
-        # start = time.time()
-        # end = start
-        # sims = 0
-        # while end - start < 0.9:
+        # for i in range(self.num_sim):
+        #     self.search(state)
+        start = time.time()
+        end = start
+        sims = 0
+        while end - start < 0.9:
             self.search(state)
-        #     end = time.time()
-        #     sims += 1
-        #     if sims < 3 and end - start > 0.4:
-        #         # Seems like in the beginning startup takes a while
-        #         break
-        # log.info(f'completed {sims} simulations in {end - start} seconds')
+            end = time.time()
+            sims += 1
+            if sims < 3 and end - start > 0.4:
+                # Seems like in the beginning startup takes a while
+                break
+        # if end - start > 1:
+        #     log.info(f'completed {sims} simulations in {end - start} seconds')
 
         action_counts = [self.Nsa[(state, action)] if (state, action) in self.Nsa else 0 for action in range(self.num_actions)]
 

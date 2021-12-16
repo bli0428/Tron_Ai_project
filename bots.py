@@ -57,6 +57,7 @@ class StudentBot:
         """
         pass
 
+
 class RandBot:
     """Moves in a random (safe) direction"""
 
