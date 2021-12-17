@@ -21,7 +21,7 @@ class StudentBot:
         Input: asp, a TronProblem
         Output: A direction in {'U','D','L','R'}
         """
-        return self.alpha_beta_cutoff(asp, 3, self.heuristic_func)
+        return self.alpha_beta_cutoff(asp, 6, self.heuristic_func)
     
     def cleanup(self):
         """
@@ -71,15 +71,14 @@ class StudentBot:
                 # Since we can assume the games are alternating, I can just make the numbers negative
                 return maximizing_player * (result[1] - result[0])
             else:
+                if c_ply <= 0:
+                    return heuristic_func(asp, state)
                 v = -math.inf
                 for a in list(asp.get_safe_actions(state.board, state.player_locs[state.ptm])):
-                    if c_ply <= 0:
-                        v = max(v, heuristic_func(asp, state))
-                    else:
-                        v = max(v, min_value(asp.transition(state, a), alpha, beta, c_ply-1))
-                        if v >= beta:
-                            return v
-                        alpha = max(alpha, v)
+                    v = max(v, min_value(asp.transition(state, a), alpha, beta, c_ply-1))
+                    if v >= beta:
+                        return v
+                    alpha = max(alpha, v)
                 return v
 
         def min_value(state: GameState, alpha: float, beta: float, c_ply: int) -> float:
@@ -87,15 +86,14 @@ class StudentBot:
                 result = asp.evaluate_state(state)
                 return maximizing_player * (result[1] - result[0])
             else:
+                if c_ply <= 0:
+                    return heuristic_func(asp, state)
                 v = math.inf
                 for a in list(asp.get_safe_actions(state.board, state.player_locs[state.ptm])):
-                    if c_ply <= 0:
-                        v = min(v, heuristic_func(asp, state))
-                    else: 
-                        v = min(v, max_value(asp.transition(state, a), alpha, beta, c_ply-1))
-                        if v <= alpha:
-                            return v
-                        beta = min(beta, v)
+                    v = min(v, max_value(asp.transition(state, a), alpha, beta, c_ply-1))
+                    if v <= alpha:
+                        return v
+                    beta = min(beta, v)
                 return v
 
         best_action = None
@@ -104,18 +102,11 @@ class StudentBot:
         beta = math.inf
         for action in list(asp.get_safe_actions(start_state.board, start_state.player_locs[start_state.ptm])):
             next_state = asp.transition(start_state, action)
-            if cutoff_ply == 1:
-                val = heuristic_func(asp, next_state)
-                if (val > curr_v):
-                    curr_v = val
-                    best_action = action
-            else:
-                val = min_value(next_state, alpha, beta, cutoff_ply-1)
-                if (val > curr_v):
-                    curr_v = val
-                    best_action = action
-                alpha = max(alpha, curr_v)
-        print(best_action)
+            val = min_value(next_state, alpha, beta, cutoff_ply-1)
+            if (val > curr_v):
+                curr_v = val
+                best_action = action
+            alpha = max(alpha, curr_v)
         return best_action
 
     def heuristic_func(self, asp, state):
