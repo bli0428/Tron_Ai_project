@@ -21,7 +21,7 @@ class StudentBot:
         Input: asp, a TronProblem
         Output: A direction in {'U','D','L','R'}
         """
-        return self.alpha_beta_cutoff(asp, 6, self.heuristic_func)
+        return self.alpha_beta_cutoff(asp, 5, self.heuristic_func)
     
     def cleanup(self):
         """
@@ -119,12 +119,24 @@ class StudentBot:
         for r in range(ptm_dists.shape[0]):
             for c in range(ptm_dists.shape[1]):
                 if ptm_dists[r,c] < opp_dists[r,c]:
-                    total +=1
+                    total += 1
                 elif ptm_dists[r,c] > opp_dists[r,c]:
                     total -= 1
-                elif ptm_dists[r,c] == opp_dists[r,c]:
-                    total += 0.5
-        return total
+            
+        neighbor_indices  = [(1, 0), (0, 1), (-1, 0), (0, -1)]
+        edge_map = np.zeros(ptm_dists.shape)
+        for r in range(1, ptm_dists.shape[0] - 1): 
+            for c in range(0, ptm_dists.shape[1] - 1):
+                if ptm_dists[r,c] == math.inf:
+                    for i in neighbor_indices:
+                        zipped = zip((r,c), i)
+                        mapped = map(sum, zipped)
+                        index = tuple(mapped)
+                        if ptm_dists[index] != math.inf:
+                            edge_map[index] = 1
+        edge_length = np.sum(edge_map)
+        # Need to multiply by -1 because heuristic calculates total for wrong player
+        return -total*edge_length
 
 
     def dijkstra(self, asp, state, pos):
@@ -134,7 +146,8 @@ class StudentBot:
         g = {}
         g[pos] = 0
         result = np.zeros(board_shape)
-        
+        result.fill(math.inf)
+
         frontier = PriorityQueue()
         frontier.put(PrioritizedItem(0, pos))
         while not frontier.empty():
