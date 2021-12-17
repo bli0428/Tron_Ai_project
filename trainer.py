@@ -4,7 +4,7 @@ from mcts import MonteCarloSearchTree
 import logging
 import numpy as np
 from preprocess import get_converted_boards
-from bots import StudentBot
+from alphazerobots import StudentBot
 from tronproblem import TronProblem
 from random import shuffle
 import copy
@@ -12,7 +12,7 @@ import os
 import sys
 from pickle import Pickler, Unpickler
 from hyperparameters import TRAINER_PARAMETERS
-import bots
+import alphazerobots
 import ta_bots
 from multiprocessing import Pool
 import time
@@ -58,7 +58,7 @@ class Trainer:
             mcts = MonteCarloSearchTree(game, self.net)
             bot = None
             if opp == 0:
-                bot = bots.WallBot()
+                bot = alphazerobots.WallBot()
             elif opp == 1:
                 bot = ta_bots.TABot1()
             elif opp == 2:
