@@ -14,6 +14,9 @@ from pickle import Pickler, Unpickler
 from hyperparameters import TRAINER_PARAMETERS
 import bots
 import ta_bots
+from multiprocessing import Pool
+import time
+import math
 
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -37,10 +40,13 @@ class Trainer:
         self.train_history_size = TRAINER_PARAMETERS["train_history_size"]
         self.temperature_threshold = TRAINER_PARAMETERS["temp_threshold"]
         self.skip_first_self_play = False
-
         self.checkpoint_dir = './temp/'
+        self.pool = Pool()
 
-    def execute_episode(self):
+
+
+    def execute_episode(self, num):
+        np.random.seed(int(time.time() + math.sin(num) * 1000))
         map_path = np.random.choice(self.maps)
         opp = np.random.choice(4, p=[0.1, 0.2, 0.3, 0.4])
         if opp == 3:
@@ -52,7 +58,7 @@ class Trainer:
             mcts = MonteCarloSearchTree(game, self.net)
             bot = None
             if opp == 0:
-                bot = bots.Wallbot()
+                bot = bots.WallBot()
             elif opp == 1:
                 bot = ta_bots.TABot1()
             elif opp == 2:
@@ -121,10 +127,16 @@ class Trainer:
                 iteration_train_examples = []
 
                 # Gets one long list of examples (and their symmetries) where one episode is one game as one item in iteration_train_examples
-                for ep in range(self.num_episodes):
-                    # log.info(f'Running Episode {ep + 1}')
-                    episode = self.execute_episode()
-                    iteration_train_examples.extend(episode)
+                episodes = self.pool.map(self.execute_episode, range(self.num_episodes))
+                for ep in episodes:
+                    iteration_train_examples.extend(ep)
+
+                # for ep in range(self.num_episodes):
+                #     # log.info(f'Running Episode {ep + 1}')
+                #     episode = self.execute_episode()
+                #     iteration_train_examples.extend(episode)
+
+                    
                 self.train_history.append(iteration_train_examples)
 
             if len(self.train_history) > self.train_history_size:
@@ -146,7 +158,7 @@ class Trainer:
             self.net.train_model(train_examples)
 
             log.info('Playing previous version...')
-            total_ratio, win_ratios = self.run_games()
+            total_ratio, win_ratios = self.run_games_parallel()
             
             # If newer model does better than older model by (win ratio), take it as the new comparer
             log.info('Win ratios: %s' % win_ratios)
@@ -178,6 +190,35 @@ class Trainer:
             final_ratio += win_ratio
         final_ratio /= len(self.maps)
         return final_ratio, map_win_ratios
+    
+    def run_games_parallel(self):
+        map_win_ratios = {}
+        for map in self.maps:
+            map_win_ratios[map] = 0
+        final_ratio = 0
+
+        games = [(map_path, i) for i in range(self.num_games) for map_path in self.maps]
+        results = self.pool.map(self.run_parallel_game, games)
+
+        for i in range(len(games)):
+            result = results[i]
+            map_win_ratios[games[i]] += result
+            final_ratio += result
+        for map in self.maps:
+            map_win_ratios[map] /= float(20)
+        final_ratio /= float(len(self.maps))
+        return final_ratio, map_win_ratios
+            
+        
+    def run_parallel_game(self, map_path, num):
+        np.random.seed(int(time.time() + math.sin(num) * 1000))
+        asp = TronProblem(f'./maps/{map_path}.txt', 0)
+        p_mcts = MonteCarloSearchTree(asp, self.prev_net)
+        n_mcts = MonteCarloSearchTree(asp, self.net)
+        p_bot = StudentBot(p_mcts)
+        n_bot = StudentBot(n_mcts)
+        g = self.run_game(asp, [p_bot, n_bot])
+        return g.index(1)
 
     def run_game(self, asp, bots):
         """
